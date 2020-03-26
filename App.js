@@ -19,6 +19,7 @@ export default function App() {
 	const [client, setClient] = useState(null)
 	const [isLoggedIn, setLoggedIn] = useState(null)
 	const preLoad = async () => {
+		await AsyncStorage.clear()
 		try {
 			await Font.loadAsync({
 				...Ionicons.font
@@ -49,7 +50,7 @@ export default function App() {
 	useEffect(() => {
 		preLoad()
 	}, [])
-
+	console.log(isLoggedIn)
 	return loaded && client && isLoggedIn !== null ? (
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={styles}>
