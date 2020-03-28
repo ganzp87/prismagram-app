@@ -8,7 +8,8 @@ import Profile from "../screens/Tabs/Profile"
 import Search from "../screens/Tabs/Search"
 import { createStackNavigator } from "@react-navigation/stack"
 import MessagesLink from "../components/MessagesLink"
-import { View } from "react-native"
+import { View, Platform } from "react-native"
+import NavIcon from "../components/NavIcon"
 
 const Tab = createBottomTabNavigator()
 const Stack = createStackNavigator()
@@ -19,9 +20,10 @@ const HomeStack = () => (
 			name="Home"
 			component={Home}
 			options={{
-				// headerTitle: (props) => "Text",
+				headerTitle: <NavIcon name="logo-instagram" size={36} />,
 				headerRight: () => <MessagesLink />,
-				title: "Home"
+				// title: "Home",
+				headerTitleAlign: "center"
 			}}
 		/>
 	</Stack.Navigator>
@@ -31,7 +33,7 @@ const NotificationStack = () => (
 		<Stack.Screen
 			name="Notification"
 			component={Notifications}
-			options={{ title: "Notification!" }}
+			options={{ title: "Notification!", headerTitleAlign: "center" }}
 		/>
 	</Stack.Navigator>
 )
@@ -40,7 +42,7 @@ const ProfileStack = () => (
 		<Stack.Screen
 			name="Profile"
 			component={Profile}
-			options={{ title: "Profile!" }}
+			options={{ title: "Profile!", headerTitleAlign: "center" }}
 		/>
 	</Stack.Navigator>
 )
@@ -49,15 +51,35 @@ const SearchStack = () => (
 		<Stack.Screen
 			name="Search"
 			component={Search}
-			options={{ title: "Search!" }}
+			options={{ title: "Search!", headerTitleAlign: "center" }}
 		/>
 	</Stack.Navigator>
 )
 
 export default ({ navigation }) => (
-	<Tab.Navigator initialRouteName="Home">
-		<Tab.Screen name="Home" component={HomeStack} />
-		<Tab.Screen name="Notification" component={NotificationStack} />
+	<Tab.Navigator initialRouteName="Home" tabBarOptions={{ showLabel: false }}>
+		<Tab.Screen
+			name="Home"
+			component={HomeStack}
+			options={{
+				tabBarIcon: ({ focused, color, size }) => (
+					<NavIcon
+						name={Platform.OS === "ios" ? "ios-home" : "md-home"}
+					/>
+				)
+			}}
+		/>
+		<Tab.Screen
+			name="Notification"
+			component={NotificationStack}
+			options={{
+				tabBarIcon: ({ focused, color, size }) => (
+					<NavIcon
+						name={Platform.OS === "ios" ? "ios-heart" : "md-heart"}
+					/>
+				)
+			}}
+		/>
 		<Tab.Screen
 			name="Add"
 			component={View}
@@ -67,8 +89,39 @@ export default ({ navigation }) => (
 					navigation.navigate("PhotoNavigation")
 				}
 			}}
+			options={{
+				tabBarIcon: ({ focused, color, size }) => (
+					<NavIcon
+						name={Platform.OS === "ios" ? "ios-add" : "md-add"}
+					/>
+				)
+			}}
 		/>
-		<Tab.Screen name="Profile" component={ProfileStack} />
-		<Tab.Screen name="Search" component={SearchStack} />
+		<Tab.Screen
+			name="Profile"
+			component={ProfileStack}
+			options={{
+				tabBarIcon: ({ focused, color, size }) => (
+					<NavIcon
+						name={
+							Platform.OS === "ios" ? "ios-person" : "md-person"
+						}
+					/>
+				)
+			}}
+		/>
+		<Tab.Screen
+			name="Search"
+			component={SearchStack}
+			options={{
+				tabBarIcon: ({ focused, color, size }) => (
+					<NavIcon
+						name={
+							Platform.OS === "ios" ? "ios-search" : "md-search"
+						}
+					/>
+				)
+			}}
+		/>
 	</Tab.Navigator>
 )

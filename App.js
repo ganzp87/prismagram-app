@@ -19,7 +19,7 @@ export default function App() {
 	const [client, setClient] = useState(null)
 	const [isLoggedIn, setLoggedIn] = useState(null)
 	const preLoad = async () => {
-		await AsyncStorage.clear()
+		// await AsyncStorage.clear()
 		try {
 			await Font.loadAsync({
 				...Ionicons.font

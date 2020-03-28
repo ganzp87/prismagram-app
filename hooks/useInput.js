@@ -5,7 +5,7 @@ const useInput = (initialValue) => {
 	const onChange = (text) => {
 		setvalue(text)
 	}
-	return { value, onChange }
+	return { value, onChange, setvalue }
 }
 
 export default useInput
