@@ -32,6 +32,12 @@ export default function App() {
 			})
 			const client = new ApolloClient({
 				cache,
+				request: async (operation) => {
+					const token = await AsyncStorage.getItem("jwt")
+					return operation.setContext({
+						headers: { Authorization: `Bearer ${token}` }
+					})
+				},
 				...options
 			})
 			const isLoggedIn = await AsyncStorage.getItem("isLoggedIn")
@@ -50,7 +56,7 @@ export default function App() {
 	useEffect(() => {
 		preLoad()
 	}, [])
-	console.log(isLoggedIn)
+	// console.log(isLoggedIn)
 	return loaded && client && isLoggedIn !== null ? (
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={styles}>

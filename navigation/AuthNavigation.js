@@ -12,9 +12,9 @@ const Stack = createStackNavigator()
 
 export default () => (
 	<NavigationContainer>
-		<Stack.Navigator initialRouteName="SignUp" headerMode="none">
-			<Stack.Screen name="SignUp" component={SignUp} />
+		<Stack.Navigator initialRouteName="AuthHome" headerMode="none">
 			<Stack.Screen name="AuthHome" component={AuthHome} />
+			<Stack.Screen name="SignUp" component={SignUp} />
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Confirm" component={Confirm} />
 		</Stack.Navigator>

@@ -4,12 +4,17 @@ import { createStackNavigator } from "@react-navigation/stack"
 import TabNavigation from "./TabNavigation"
 import PhotoNavigation from "./PhotoNavigation"
 import MessageNavigation from "./MessageNavigation"
+import { stackStyles } from "./config"
 
 const MainNavigator = createStackNavigator()
 
 export default () => (
 	<NavigationContainer>
-		<MainNavigator.Navigator headerMode="none" mode="card">
+		<MainNavigator.Navigator
+			headerMode="none"
+			mode="card"
+			screenOptions={{ headerStyle: { ...stackStyles } }}
+		>
 			<MainNavigator.Screen
 				name="TabNavigation"
 				component={TabNavigation}

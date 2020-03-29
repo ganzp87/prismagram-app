@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack"
 import SelectPhoto from "../screens/Photo/SelectPhoto"
 import TakePhoto from "../screens/Photo/TakePhoto"
 import UploadPhoto from "../screens/Photo/UploadPhoto"
+import { stackStyles } from "./config"
 
 const Tab = createMaterialTopTabNavigator()
 const Stack = createStackNavigator()
@@ -16,7 +17,7 @@ const PhotoTabs = () => (
 )
 
 export default () => (
-	<Stack.Navigator>
+	<Stack.Navigator screenOptions={{ headerStyle: { ...stackStyles } }}>
 		<Stack.Screen name=" " component={PhotoTabs} />
 		<Stack.Screen name="UploadPhoto" component={UploadPhoto} />
 	</Stack.Navigator>
