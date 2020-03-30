@@ -79,15 +79,15 @@ export default ({ route }) => {
 				data &&
 				data.searchPost &&
 				data.searchPost.map((post) => (
-					<TouchableOpacity
-						onPress={() =>
-							navigation.navigate("Detail", {
-								id: post.id
-							})
-						}
-					>
-						<SquarePhoto key={post.key} {...post} />
-					</TouchableOpacity>
+					// <TouchableOpacity
+					// 	onPress={() =>
+					// 		navigation.navigate("Detail", {
+					// 			id: post.id
+					// 		})
+					// 	}
+					// >
+					<SquarePhoto key={post.key} {...post} />
+					// </TouchableOpacity>
 				))
 			)}
 		</ScrollView>

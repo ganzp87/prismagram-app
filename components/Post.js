@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons"
 import styles from "../styles"
 import { gql } from "apollo-boost"
 import { useMutation } from "react-apollo-hooks"
+import { useNavigation } from "@react-navigation/native"
 
 export const TOGGLE_LIKE = gql`
 	mutation toggleLike($postId: String!) {
@@ -69,6 +70,7 @@ const Post = ({
 	comments = [],
 	isLiked: isLikedProp
 }) => {
+	const navigation = useNavigation()
 	const [isLiked, setIsLiked] = useState(isLikedProp)
 	const [likeCount, setlikeCount] = useState(likeCountProp)
 	const [toggleLikeMutation] = useMutation(TOGGLE_LIKE, {
@@ -92,7 +94,19 @@ const Post = ({
 	return (
 		<Container>
 			<Header>
-				<Touchable>
+				<Touchable
+					onPress={() =>
+						navigation.navigate("TabNavigation", {
+							screen: "Profile",
+							params: {
+								screen: "UserDetail",
+								params: {
+									username: user.username
+								}
+							}
+						})
+					}
+				>
 					<Image
 						style={{ height: 40, width: 40, borderRadius: 20 }}
 						source={{
@@ -100,7 +114,19 @@ const Post = ({
 						}}
 					/>
 				</Touchable>
-				<Touchable>
+				<Touchable
+					onPress={() =>
+						navigation.navigate("TabNavigation", {
+							screen: "Profile",
+							params: {
+								screen: "UserDetail",
+								params: {
+									username: user.username
+								}
+							}
+						})
+					}
+				>
 					<HeaderUserContainer>
 						<Bold>{user.username}</Bold>
 						<Location>{location}</Location>

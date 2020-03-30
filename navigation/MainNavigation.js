@@ -11,6 +11,7 @@ const MainNavigator = createStackNavigator()
 export default () => (
 	<NavigationContainer>
 		<MainNavigator.Navigator
+			initialRouteName="PhotoNavigation"
 			headerMode="none"
 			mode="card"
 			screenOptions={{ headerStyle: { ...stackStyles } }}

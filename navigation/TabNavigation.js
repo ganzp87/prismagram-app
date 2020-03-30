@@ -15,6 +15,7 @@ import { stackStyles } from "./config"
 import SearchBar from "../components/SearchBar"
 import { createCompatNavigatorFactory } from "@react-navigation/compat"
 import styles from "../styles"
+import UserDetail from "../screens/UserDetail"
 
 const Tab = createBottomTabNavigator()
 const Stack = createStackNavigator()
@@ -57,6 +58,16 @@ const ProfileStack = () => (
 				headerTitleAlign: "center",
 				headerStyle: { ...stackStyles }
 			}}
+		/>
+		<Stack.Screen
+			name="UserDetail"
+			component={UserDetail}
+			options={(navigation) => ({
+				headerBackTitle: null,
+				headerPressColorAndroid: styles.darkBlueColor,
+				headerTintColor: styles.blackColor,
+				title: navigation.route.params.username
+			})}
 		/>
 	</Stack.Navigator>
 )

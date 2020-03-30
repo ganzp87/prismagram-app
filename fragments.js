@@ -39,6 +39,8 @@ export const USER_FRAGMENT = gql`
 		isFollowing
 		isSelf
 		bio
+		followingCount
+		followersCount
 		# following {
 		# 	id
 		# 	username
@@ -47,6 +49,7 @@ export const USER_FRAGMENT = gql`
 		# 	id
 		# 	username
 		# }
+		postsCount
 		posts {
 			...PostParts
 		}
