@@ -25,8 +25,8 @@ const PhotoTabs = () => (
 			}
 		}}
 	>
-		<Tab.Screen name="Take" component={TakePhoto} />
 		<Tab.Screen name="Select" component={SelectPhoto} />
+		<Tab.Screen name="Take" component={TakePhoto} />
 	</Tab.Navigator>
 )
 
@@ -35,8 +35,17 @@ export default () => (
 		<Stack.Screen
 			name=" "
 			component={PhotoTabs}
-			options={{ title: "Choose Photo", headerTitleAlign: "center" }}
+			options={{
+				title: "Choose Photo",
+				headerTitleAlign: "center",
+				headerBackTitle: null
+			}}
 		/>
-		<Stack.Screen name="UploadPhoto" component={UploadPhoto} />
+
+		<Stack.Screen
+			name="UploadPhoto"
+			component={UploadPhoto}
+			options={{ headerTintColor: styles.blackColor }}
+		/>
 	</Stack.Navigator>
 )

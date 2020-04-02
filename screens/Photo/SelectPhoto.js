@@ -5,17 +5,37 @@ import styled from "styled-components"
 import Loader from "../../components/Loader"
 import { Image, TouchableOpacity, ScrollView } from "react-native"
 import constants from "../../constants"
+import styles from "../../styles"
+import { useNavigation } from "@react-navigation/native"
 
 const View = styled.View`
 	flex: 1;
 	/* flex-direction: row; */
 `
+const Button = styled.TouchableOpacity`
+	width: 100px;
+	height: 30px;
+	position: absolute;
+	right: 5px;
+	top: 15px;
+	background-color: ${styles.blueColor};
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+`
 
-export default () => {
+const Text = styled.Text`
+	color: white;
+	font-weight: 600;
+`
+
+export default ({ route }) => {
 	const [loading, setLoading] = useState(true)
 	const [hasPermission, setHasPermission] = useState(false)
 	const [selected, setSelected] = useState()
 	const [allPhotos, setAllPhotos] = useState()
+	const navigation = useNavigation()
+
 	const changeSelected = (photo) => {
 		setSelected(photo)
 	}
@@ -47,6 +67,9 @@ export default () => {
 			setHasPermission(false)
 		}
 	}
+	const handleSelected = () => {
+		navigation.navigate("UploadPhoto", { photo: selected })
+	}
 	useEffect(() => {
 		askPermission()
 	}, [])
@@ -66,9 +89,13 @@ export default () => {
 								}}
 								source={{ uri: selected.uri }}
 							/>
+							<Button onPress={handleSelected}>
+								<Text>Select Photo</Text>
+							</Button>
 							<ScrollView
 								contentContainerStyle={{
-									flexDirection: "row"
+									flexDirection: "row",
+									flexWrap: "wrap"
 								}}
 							>
 								{allPhotos.map((photo) => (

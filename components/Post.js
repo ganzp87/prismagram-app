@@ -91,6 +91,7 @@ const Post = ({
 			console.log(error)
 		}
 	}
+	// console.log(user, location, files)
 	return (
 		<Container>
 			<Header>
@@ -207,8 +208,10 @@ const Post = ({
 							</CommentCount>
 						</Touchable>
 					</CommentsContainer>
-				) : (
+				) : comments.length !== 0 ? (
 					<Caption>{comments[0].text}</Caption>
+				) : (
+					<></>
 				)}
 			</InfoContainer>
 		</Container>

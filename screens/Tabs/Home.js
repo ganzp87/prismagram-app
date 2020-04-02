@@ -14,7 +14,7 @@ const View = styled.View`
 	background-color: white;
 `
 
-const FEED_QUERY = gql`
+export const FEED_QUERY = gql`
 	{
 		seeFeed {
 			...PostParts
@@ -22,7 +22,7 @@ const FEED_QUERY = gql`
 	}
 	${POST_FRAGMENT}
 `
-export default ({ params, routes }) => {
+export default () => {
 	const [refreshing, setRefreshing] = useState(false)
 	const { loading, data, refetch } = useQuery(FEED_QUERY)
 	const refresh = async () => {
@@ -35,7 +35,7 @@ export default ({ params, routes }) => {
 			setRefreshing(false)
 		}
 	}
-	// console.log(loading, data)
+	console.log(loading, data)
 	return (
 		<ScrollView
 			refreshControl={
