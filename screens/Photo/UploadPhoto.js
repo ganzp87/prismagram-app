@@ -98,7 +98,7 @@ export default ({ route }) => {
 					files: [location]
 				}
 			})
-			console.log(upload)
+			// console.log(upload)
 			if (upload.id) {
 				navigation.navigate("TabNavigation")
 			}

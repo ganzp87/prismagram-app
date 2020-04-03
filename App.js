@@ -6,13 +6,12 @@ import { Asset } from "expo-asset"
 import { AsyncStorage } from "react-native"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import { persistCache } from "apollo-cache-persist"
-import ApolloClient from "apollo-boost"
-import options from "./apollo"
 import { ApolloProvider } from "react-apollo-hooks"
 import { ThemeProvider } from "styled-components"
 import styles from "./styles"
 import NavController from "./components/NavController"
 import { AuthProvider } from "./AuthContext"
+import clientState from "./apollo"
 
 export default function App() {
 	const [loaded, setLoaded] = useState(false)
@@ -25,21 +24,13 @@ export default function App() {
 				...Ionicons.font
 			})
 			await Asset.loadAsync([require("./assets/logo.png")])
+
 			const cache = new InMemoryCache()
 			await persistCache({
 				cache,
 				storage: AsyncStorage
 			})
-			const client = new ApolloClient({
-				cache,
-				request: async (operation) => {
-					const token = await AsyncStorage.getItem("jwt")
-					return operation.setContext({
-						headers: { Authorization: `Bearer ${token}` }
-					})
-				},
-				...options
-			})
+			const client = clientState(cache)
 			const isLoggedIn = await AsyncStorage.getItem("isLoggedIn")
 			if (!isLoggedIn || isLoggedIn === "false") {
 				setLoggedIn(false)
