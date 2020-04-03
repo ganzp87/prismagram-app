@@ -12,3 +12,4 @@ web-report/
 node_modules
 # macOS
 .DS_Store
+build
