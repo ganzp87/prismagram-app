@@ -1,18 +1,10 @@
-import React, { useState } from "react"
-import styled from "styled-components"
+import React, { useState, useContext } from "react"
 import Loader from "../../components/Loader"
 import { gql } from "apollo-boost"
 import { useQuery } from "react-apollo-hooks"
 import { ScrollView, RefreshControl } from "react-native"
 import Post from "../../components/Post"
 import { POST_FRAGMENT } from "../../fragments"
-
-const View = styled.View`
-	justify-content: center;
-	align-items: center;
-	flex: 1;
-	background-color: white;
-`
 
 export const FEED_QUERY = gql`
 	{
@@ -35,7 +27,6 @@ export default () => {
 			setRefreshing(false)
 		}
 	}
-	// console.log(loading, data)
 	return (
 		<ScrollView
 			refreshControl={

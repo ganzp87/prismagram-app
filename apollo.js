@@ -1,27 +1,41 @@
-import { withClientState } from "apollo-link-state"
 import { ApolloClient } from "apollo-client"
+import { withClientState } from "apollo-link-state"
 import { HttpLink } from "apollo-link-http"
 import { onError } from "apollo-link-error"
-import { ApolloLink, split } from "apollo-link"
+import { ApolloLink, split, Observable } from "apollo-link"
 import { WebSocketLink } from "apollo-link-ws"
 import { getMainDefinition } from "apollo-utilities"
+import { AsyncStorage } from "react-native"
+
+const httpOptions = {
+	uri:
+		process.env.NODE_ENV === "developmen"
+			? "http://192.168.0.3:4000"
+			: "https://prismagram-backendd.herokuapp.com/",
+}
+const wsOptions = {
+	uri:
+		process.env.NODE_ENV === "developmen"
+			? `ws://192.168.0.3:4000/`
+			: `wss://prismagram-backendd.herokuapp.com/`,
+}
 
 const httpLink = new HttpLink({
-	uri: "https://localhost:4000",
-	credentials: "same-origin"
+	uri: httpOptions.uri,
+	credentials: "include",
 })
 
 const wsLink = new WebSocketLink({
-	uri: `ws://localhost:4000/`,
+	uri: wsOptions.uri,
 	options: {
-		reconnect: true
-	}
+		reconnect: true,
+	},
 })
 
 const request = async (operation) => {
 	const token = await AsyncStorage.getItem("jwt")
 	return operation.setContext({
-		headers: { Authorization: `Bearer ${token}` }
+		headers: { Authorization: `Bearer ${token}` },
 	})
 }
 const requestLink = new ApolloLink(
@@ -34,7 +48,7 @@ const requestLink = new ApolloLink(
 					handle = forward(operation).subscribe({
 						next: observer.next.bind(observer),
 						error: observer.error.bind(observer),
-						complete: observer.complete.bind(observer)
+						complete: observer.complete.bind(observer),
 					})
 				})
 				.catch(observer.error.bind(observer))
@@ -49,18 +63,20 @@ const clientState = (cache) =>
 		link: ApolloLink.from([
 			onError(({ graphQLErrors, networkError }) => {
 				if (graphQLErrors)
-					graphQLErrors.forEach(({ message, locations, path }) =>
+					graphQLErrors.forEach(({ message, locations, path }) => {
 						console.log(
-							`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+							`[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
+								locations
+							)}, Path: ${path}`
 						)
-					)
+					})
 				if (networkError)
 					console.log(`[Network error]: ${networkError}`)
 			}),
 			requestLink,
 			withClientState({
 				defaults: {
-					isConnected: true
+					isConnected: true,
 				},
 				resolvers: {
 					Mutation: {
@@ -71,15 +87,16 @@ const clientState = (cache) =>
 						) => {
 							cache.writeData({ data: { isConnected } })
 							return null
-						}
-					}
+						},
+					},
 				},
-				cache
+				cache,
 			}),
 			split(
 				// split based on operation type
 				({ query }) => {
 					const definition = getMainDefinition(query)
+					console.log(definition.operation)
 					return (
 						definition.kind === "OperationDefinition" &&
 						definition.operation === "subscription"
@@ -87,16 +104,9 @@ const clientState = (cache) =>
 				},
 				wsLink,
 				httpLink
-			)
+			),
 		]),
-		cache
+		cache,
 	})
-
-const options = {
-	uri:
-		process.env.NODE_ENV === "development"
-			? "http://192.168.0.3:4000"
-			: "https://prismagram-backendd.herokuapp.com/"
-}
 
 export default clientState

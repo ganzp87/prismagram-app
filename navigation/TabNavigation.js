@@ -13,7 +13,6 @@ import { View, Platform } from "react-native"
 import NavIcon from "../components/NavIcon"
 import { stackStyles } from "./config"
 import SearchBar from "../components/SearchBar"
-import { createCompatNavigatorFactory } from "@react-navigation/compat"
 import styles from "../styles"
 import UserDetail from "../screens/UserDetail"
 
@@ -30,7 +29,7 @@ const HomeStack = () => (
 				headerRight: () => <MessagesLink />,
 				// title: "Home",
 				headerTitleAlign: "center",
-				headerStyle: { ...stackStyles }
+				headerStyle: { ...stackStyles },
 			}}
 		/>
 	</Stack.Navigator>
@@ -43,7 +42,7 @@ const NotificationStack = () => (
 			options={{
 				title: "Notification!",
 				headerTitleAlign: "center",
-				headerStyle: { ...stackStyles }
+				headerStyle: { ...stackStyles },
 			}}
 		/>
 	</Stack.Navigator>
@@ -56,7 +55,7 @@ const ProfileStack = () => (
 			options={{
 				title: "Profile!",
 				headerTitleAlign: "center",
-				headerStyle: { ...stackStyles }
+				headerStyle: { ...stackStyles },
 			}}
 		/>
 		<Stack.Screen
@@ -66,7 +65,7 @@ const ProfileStack = () => (
 				headerBackTitle: null,
 				headerPressColorAndroid: styles.darkBlueColor,
 				headerTintColor: styles.blackColor,
-				title: navigation.route.params.username
+				title: navigation.route.params.username,
 			})}
 		/>
 	</Stack.Navigator>
@@ -77,7 +76,7 @@ const SearchStack = () => {
 	return (
 		<Stack.Navigator
 			screenOptions={{
-				headerStyle: { ...stackStyles }
+				headerStyle: { ...stackStyles },
 			}}
 		>
 			<Stack.Screen
@@ -91,12 +90,12 @@ const SearchStack = () => {
 							value={textChange}
 							onSubmit={() => {
 								navigation.push("Search", {
-									text: textChange
+									text: textChange,
 								})
 							}}
 							onChangeText={(text) => setTextChange(text)}
 						/>
-					)
+					),
 				}}
 			/>
 			<Stack.Screen
@@ -105,7 +104,7 @@ const SearchStack = () => {
 				options={{
 					headerPressColorAndroid: styles.darkBlueColor,
 					headerTintColor: styles.blackColor,
-					title: "Photo"
+					title: "Photo",
 				}}
 			/>
 		</Stack.Navigator>
@@ -117,7 +116,7 @@ export default ({ navigation }) => (
 		initialRouteName="Home"
 		tabBarOptions={{
 			showLabel: false,
-			style: { ...stackStyles }
+			style: { ...stackStyles },
 		}}
 	>
 		<Tab.Screen
@@ -129,7 +128,7 @@ export default ({ navigation }) => (
 						focused={focused}
 						name={Platform.OS === "ios" ? "ios-home" : "md-home"}
 					/>
-				)
+				),
 			}}
 		/>
 		<Tab.Screen
@@ -149,7 +148,7 @@ export default ({ navigation }) => (
 								: "md-heart-empty"
 						}
 					/>
-				)
+				),
 			}}
 		/>
 		<Tab.Screen
@@ -159,7 +158,7 @@ export default ({ navigation }) => (
 				tabPress: (e) => {
 					e.preventDefault()
 					navigation.navigate("PhotoNavigation")
-				}
+				},
 			}}
 			options={{
 				tabBarIcon: ({ focused, color, size }) => (
@@ -168,7 +167,7 @@ export default ({ navigation }) => (
 						name={Platform.OS === "ios" ? "ios-add" : "md-add"}
 						size={26}
 					/>
-				)
+				),
 			}}
 		/>
 		<Tab.Screen
@@ -182,7 +181,7 @@ export default ({ navigation }) => (
 							Platform.OS === "ios" ? "ios-person" : "md-person"
 						}
 					/>
-				)
+				),
 			}}
 		/>
 		<Tab.Screen
@@ -197,7 +196,7 @@ export default ({ navigation }) => (
 							Platform.OS === "ios" ? "ios-search" : "md-search"
 						}
 					/>
-				)
+				),
 			}}
 		/>
 	</Tab.Navigator>

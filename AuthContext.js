@@ -3,13 +3,20 @@ import { AsyncStorage } from "react-native"
 
 export const AuthContext = createContext()
 
-export const AuthProvider = ({ isLoggedIn: isLoggedInProp, children }) => {
+export const AuthProvider = ({
+	isLoggedIn: isLoggedInProp,
+	userEmail: emailProp,
+	children,
+}) => {
 	const [isLoggedIn, setisLoggedIn] = useState(isLoggedInProp)
-	const logUserIn = async (token) => {
+	const [userEmail, setEmail] = useState(emailProp)
+	const logUserIn = async (token, email) => {
 		try {
 			await AsyncStorage.setItem("isLoggedIn", "true")
 			await AsyncStorage.setItem("jwt", token)
+			await AsyncStorage.setItem("email", email)
 			setisLoggedIn(true)
+			setEmail(email)
 		} catch (error) {
 			console.log(error)
 		}
@@ -24,7 +31,9 @@ export const AuthProvider = ({ isLoggedIn: isLoggedInProp, children }) => {
 		}
 	}
 	return (
-		<AuthContext.Provider value={{ isLoggedIn, logUserIn, logUserOut }}>
+		<AuthContext.Provider
+			value={{ isLoggedIn, logUserIn, logUserOut, userEmail }}
+		>
 			{children}
 		</AuthContext.Provider>
 	)
@@ -44,4 +53,8 @@ export const useLogIn = () => {
 export const useLogOut = () => {
 	const { logUserOut } = useContext(AuthContext)
 	return logUserOut
+}
+
+export const useSetEmail = (email) => {
+	const { setEmail } = useContext(AuthContext)
 }

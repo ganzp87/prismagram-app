@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { TouchableWithoutFeedback, Keyboard } from "react-native"
+import { TouchableWithoutFeedback, Keyboard, AsyncStorage } from "react-native"
 import styled from "styled-components"
 import AuthButton from "../../components/AuthButton"
 import AuthInput from "../../components/AuthInput"
@@ -22,8 +22,8 @@ export default ({ navigation, route }) => {
 	const [confirmSecretMutation] = useMutation(CONFIRM_SECRET, {
 		variables: {
 			secret: confirmInput.value,
-			email: route.params.email
-		}
+			email: route.params.email,
+		},
 	})
 	// console.log(route)
 	const handleConfirm = async () => {
@@ -34,11 +34,12 @@ export default ({ navigation, route }) => {
 		try {
 			setloading(true)
 			const {
-				data: { confirmSecret }
+				data: { confirmSecret },
 			} = await confirmSecretMutation()
 			if (confirmSecret !== "" || confirmSecret !== false) {
 				console.log(confirmSecret)
-				logIn(confirmSecret)
+				// await AsyncStorage.setItem("email", route.params.email)
+				logIn(confirmSecret, route.params.email)
 			} else {
 				Alert.alert("Wrong secret!")
 			}

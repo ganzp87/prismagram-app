@@ -1,17 +1,228 @@
-import React from "react"
-import styled from "styled-components"
+import React, { useState, useEffect, Suspense } from "react"
+import { useQuery, useMutation, useSubscription } from "react-apollo-hooks"
+import Loader from "../../components/Loader"
+import {
+	ScrollView,
+	RefreshControl,
+	View,
+	Text,
+	TextInput,
+	KeyboardAvoidingView,
+	ActivityIndicator,
+	Dimensions,
+} from "react-native"
+import MessagePart from "./MessagePart"
+import { SEEROOM, SEND_MESSAGE, NEW_MESSAGE } from "./MessageQuries"
 
-const View = styled.View`
-	justify-content: center;
-	align-items: center;
-	flex: 1;
-	background-color: white;
-`
+export default ({ route }) => {
+	const messageList = []
+	const roomId = route.params.roomId
+	const myInfo = {
+		email: route.params.email,
+	}
+	const [refreshing, setRefreshing] = useState(false)
+	const [message, setMessage] = useState()
 
-const Text = styled.Text``
+	const { data: { seeRoom: oldRoom = [] } = [], error, refetch } = useQuery(
+		SEEROOM,
+		{
+			variables: {
+				id: roomId,
+			},
+		},
+		{
+			// fetchPolicy: "cache-and-network",
+			pollInterval: 50,
+			suspend: true,
+		}
+	)
+	const [messages, setMessages] = useState(oldRoom.messages || [])
+	const [sendMessageMutation] = useMutation(SEND_MESSAGE, {
+		refetchQueries: refetch,
+		update(cache, { data }) {
+			const { seeRoom } = cache.readQuery({
+				query: SEEROOM,
+				variables: { id: roomId },
+			})
+			// console.log(seeRoom)
+			// console.log(JSON.stringify(seeRoom.messages))
+			// console.log(JSON.stringify(data.sendMessage))
+			cache.writeQuery({
+				query: SEEROOM,
+				variables: {
+					id: roomId,
+				},
+				data: {
+					seeRoom: {
+						__typename: "SeeRoomResponse",
+						messages: [...seeRoom.messages, data.sendMessage],
+						room: seeRoom.room,
+					},
+				},
+			}),
+				setMessages((previous) => [...previous, data.sendMessage])
+		},
+	})
+	const { data, loading } = useSubscription(NEW_MESSAGE, {
+		variables: {
+			roomId,
+			email: myInfo.email,
+		},
+		refetchQueries: refetch,
+	})
 
-export default () => (
-	<View>
-		<Text>Message</Text>
-	</View>
-)
+	const handleNewMessage = () => {
+		if (data !== undefined) {
+			console.log("New Message Come Up to ->", myInfo.email)
+			// console.log(data)
+			const { newMessage } = data
+			setMessages((previous) => [...previous, newMessage])
+		}
+	}
+	// console.log(data)
+	// messages.map((m) => console.log(m.text, m.from.username))
+	// oldRoom.messages.map((m) => console.log(m.text, m.from.username))
+	// console.log(messages)
+	useEffect(() => {
+		handleNewMessage()
+	}, [data])
+	const onSubmit = async () => {
+		if (message === "") {
+			return
+		}
+		try {
+			await sendMessageMutation({
+				variables: {
+					roomId,
+					text: message,
+				},
+			})
+			setMessage("")
+		} catch (error) {
+			console.log(error)
+		}
+	}
+	const onChangeText = (text) => {
+		setMessage(text)
+	}
+	const refresh = async () => {
+		try {
+			setRefreshing(true)
+			const a = await refetch()
+			setMessages(a.data.seeRoom.messages)
+		} catch (error) {
+			console.log(error)
+		} finally {
+			setRefreshing(false)
+		}
+	}
+	const screenHeight = Dimensions.get("window").height
+	return (
+		<KeyboardAvoidingView
+			keyboardVerticalOffset={screenHeight - 700}
+			style={{ flex: 1 }}
+			enabled
+			behavior="padding"
+		>
+			<Suspense
+				fallback={
+					<View
+						style={{
+							flex: 1,
+							justifyContent: "center",
+							alignItems: "center",
+						}}
+					>
+						<ActivityIndicator />
+					</View>
+				}
+			>
+				<View
+					style={{
+						// paddingVertical: 50,
+						padding: 10,
+						flex: 1,
+						width: "100%",
+						justifyContent: "space-between",
+						alignItems: "stretch",
+					}}
+				>
+					<View
+						style={{
+							alignItems: "center",
+							padding: 10,
+							backgroundColor: "white",
+							borderRadius: 10,
+							borderWidth: 1,
+							borderColor: "black",
+						}}
+					>
+						<View>
+							{oldRoom.room && oldRoom.room.participants && (
+								<Text key={oldRoom.room.participants[0].id}>
+									대화 참여자 :{" "}
+									{oldRoom.room.participants[0].username},{" "}
+									{oldRoom.room.participants[1].username}
+								</Text>
+							)}
+						</View>
+					</View>
+
+					<View>
+						<ScrollView
+							contentContainerStyle={{
+								height: "auto",
+								maxHeight: screenHeight - 200,
+								alignContent: "flex-end",
+								justifyContent: "flex-end",
+								// paddingVertical: 50,
+								alignItems: "center",
+								borderWidth: 1,
+								borderColor: "black",
+							}}
+							scrollEnabled={false}
+							nestedScrollEnabled={false}
+							refreshControl={
+								<RefreshControl
+									refreshing={refreshing}
+									onRefresh={refresh}
+								/>
+							}
+						>
+							{messages &&
+								messages.map((message) => {
+									if (!messageList.includes(message)) {
+										messageList.push(message)
+										return (
+											<MessagePart
+												{...message}
+												{...myInfo}
+											/>
+										)
+									}
+									return
+								})}
+						</ScrollView>
+
+						<TextInput
+							placeholder="Type a message"
+							style={{
+								alignItems: "flex-end",
+								// marginTop: 50,
+								width: "100%",
+								backgroundColor: "white",
+								borderRadius: 10,
+								paddingVertical: 10,
+								marginBottom: 10,
+							}}
+							returnKeyType="send"
+							value={message}
+							onChangeText={onChangeText}
+							onSubmitEditing={onSubmit}
+						/>
+					</View>
+				</View>
+			</Suspense>
+		</KeyboardAvoidingView>
+	)
+}
