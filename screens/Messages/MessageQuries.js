@@ -61,14 +61,20 @@ export const NEW_MESSAGE = gql`
 	subscription newMessage($roomId: String!, $email: String!) {
 		newMessage(roomId: $roomId, email: $email) {
 			id
-			text
-			from {
+			to {
 				id
+				email
 				username
 				avatar
-				email
 			}
-			updatedAt
+			from {
+				id
+				email
+				username
+				avatar
+			}
+			text
+			createdAt
 		}
 	}
 `

@@ -6,6 +6,8 @@ import { ApolloLink, split, Observable } from "apollo-link"
 import { WebSocketLink } from "apollo-link-ws"
 import { getMainDefinition } from "apollo-utilities"
 import { AsyncStorage } from "react-native"
+import { useContext } from "react"
+import { AuthContext } from "./AuthContext"
 
 const httpOptions = {
 	uri:
@@ -63,13 +65,26 @@ const clientState = (cache) =>
 		link: ApolloLink.from([
 			onError(({ graphQLErrors, networkError }) => {
 				if (graphQLErrors)
-					graphQLErrors.forEach(({ message, locations, path }) => {
-						console.log(
-							`[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
-								locations
-							)}, Path: ${path}`
-						)
-					})
+					graphQLErrors.forEach(
+						async ({ message, locations, path }) => {
+							console.log(
+								`[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
+									locations
+								)}, Path: ${path}`
+							)
+							if (
+								message ===
+								"You need to log in to perform this action"
+							) {
+								console.log("1111111111")
+								await AsyncStorage.setItem(
+									"isLoggedIn",
+									"false"
+								)
+								await AsyncStorage.clear()
+							}
+						}
+					)
 				if (networkError)
 					console.log(`[Network error]: ${networkError}`)
 			}),
@@ -96,7 +111,7 @@ const clientState = (cache) =>
 				// split based on operation type
 				({ query }) => {
 					const definition = getMainDefinition(query)
-					console.log(definition.operation)
+					// console.log(definition.operation)
 					return (
 						definition.kind === "OperationDefinition" &&
 						definition.operation === "subscription"
@@ -107,6 +122,15 @@ const clientState = (cache) =>
 			),
 		]),
 		cache,
+		defaultOptions: {
+			// watchQuery: { fetchPolicy: "network-only", errorPolicy: "all" },
+			watchQuery: {
+				fetchPolicy: "cache-and-network",
+				errorPolicy: "ignore",
+			},
+			query: { fetchPolicy: "network-only", errorPolicy: "all" },
+			mutate: { errorPolicy: "all" },
+		},
 	})
 
 export default clientState

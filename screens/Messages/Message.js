@@ -1,4 +1,10 @@
-import React, { useState, useEffect, Suspense } from "react"
+import React, {
+	useState,
+	useEffect,
+	Suspense,
+	useRef,
+	useImperativeHandle,
+} from "react"
 import { useQuery, useMutation, useSubscription } from "react-apollo-hooks"
 import Loader from "../../components/Loader"
 import {
@@ -10,9 +16,13 @@ import {
 	KeyboardAvoidingView,
 	ActivityIndicator,
 	Dimensions,
+	FlatList,
 } from "react-native"
 import MessagePart from "./MessagePart"
 import { SEEROOM, SEND_MESSAGE, NEW_MESSAGE } from "./MessageQuries"
+import { Notifications } from "expo"
+import * as Permissions from "expo-permissions"
+import Constants from "expo-constants"
 
 export default ({ route }) => {
 	const messageList = []
@@ -20,6 +30,7 @@ export default ({ route }) => {
 	const myInfo = {
 		email: route.params.email,
 	}
+	const scrollViewRef = useRef(null)
 	const [refreshing, setRefreshing] = useState(false)
 	const [message, setMessage] = useState()
 
@@ -29,11 +40,11 @@ export default ({ route }) => {
 			variables: {
 				id: roomId,
 			},
-		},
-		{
-			// fetchPolicy: "cache-and-network",
-			pollInterval: 50,
-			suspend: true,
+			fetchPolicy: "cache-and-network",
+			// suspend: true,
+			// pollInterval: 50,
+			// skip: false,
+			// returnPartialData: true,
 		}
 	)
 	const [messages, setMessages] = useState(oldRoom.messages || [])
@@ -44,9 +55,6 @@ export default ({ route }) => {
 				query: SEEROOM,
 				variables: { id: roomId },
 			})
-			// console.log(seeRoom)
-			// console.log(JSON.stringify(seeRoom.messages))
-			// console.log(JSON.stringify(data.sendMessage))
 			cache.writeQuery({
 				query: SEEROOM,
 				variables: {
@@ -69,9 +77,24 @@ export default ({ route }) => {
 			email: myInfo.email,
 		},
 		refetchQueries: refetch,
-	})
+		onSubscriptionData: ({ subscriptionData: { data }, client }) => {
+			if (!data) return null
 
-	const handleNewMessage = () => {
+			client.cache.writeQuery({
+				query: SEEROOM,
+				variables: { id: roomId },
+				data: {
+					seeRoom: {
+						__typename: "SeeRoomResponse",
+						messages: [...messages, data.newMessage],
+						room: oldRoom.room,
+					},
+				},
+			})
+			setMessages((previous) => [...previous, data.newMessage])
+		},
+	})
+	const handleNewMessage = (data) => {
 		if (data !== undefined) {
 			console.log("New Message Come Up to ->", myInfo.email)
 			// console.log(data)
@@ -79,12 +102,11 @@ export default ({ route }) => {
 			setMessages((previous) => [...previous, newMessage])
 		}
 	}
-	// console.log(data)
-	// messages.map((m) => console.log(m.text, m.from.username))
-	// oldRoom.messages.map((m) => console.log(m.text, m.from.username))
-	// console.log(messages)
 	useEffect(() => {
-		handleNewMessage()
+		setMessages(oldRoom.messages)
+	}, [oldRoom.messages])
+	useEffect(() => {
+		handleNewMessage(data)
 	}, [data])
 	const onSubmit = async () => {
 		if (message === "") {
@@ -105,24 +127,65 @@ export default ({ route }) => {
 	const onChangeText = (text) => {
 		setMessage(text)
 	}
-	const refresh = async () => {
+
+	// const refresh = async () => {
+	// 	try {
+	// 		setRefreshing(true)
+	// 		const a = await refetch()
+	// 		setMessages(a.data.seeRoom.messages)
+	// 	} catch (error) {
+	// 		console.log(error)
+	// 	} finally {
+	// 		setRefreshing(false)
+	// 	}
+	// }
+
+	const screenHeight = Dimensions.get("window").height
+	console.log(screenHeight)
+
+	const [notificationStatus, setStatus] = useState(false)
+	const askPushMessagePermission = async () => {
 		try {
-			setRefreshing(true)
-			const a = await refetch()
-			setMessages(a.data.seeRoom.messages)
+			if (Constants.isDevice) {
+				const { status: existingStatus } = await Permissions.getAsync(
+					Permissions.NOTIFICATIONS
+				)
+				let finalStatus = existingStatus
+				if (existingStatus !== "granted") {
+					const { status } = await Permissions.askAsync(
+						Permissions.NOTIFICATIONS
+					)
+					finalStatus = status
+				}
+				console.log(finalStatus)
+				setStatus(finalStatus)
+				let token = await Notifications.getExpoPushTokenAsync()
+				// ExponentPushToken[sAj6CfOeifkdcTm6N9yTJf]
+				console.log(token)
+				// Notifications.setBadgeNumberAsync(0)
+			} else {
+				console.log("Must use physical device for Push Notifications")
+				// alert("Must use physical device for Push Notifications")
+			}
 		} catch (error) {
 			console.log(error)
-		} finally {
-			setRefreshing(false)
 		}
 	}
-	const screenHeight = Dimensions.get("window").height
+	useEffect(() => {
+		askPushMessagePermission()
+	}, [])
+	if (messages) {
+		messages.sort(
+			(a, b) =>
+				Date.parse(new Date(b.createdAt)) - Date.parse(a.createdAt)
+		)
+	}
 	return (
 		<KeyboardAvoidingView
 			keyboardVerticalOffset={screenHeight - 700}
 			style={{ flex: 1 }}
 			enabled
-			behavior="padding"
+			behavior="posision"
 		>
 			<Suspense
 				fallback={
@@ -168,20 +231,60 @@ export default ({ route }) => {
 						</View>
 					</View>
 
-					<View>
-						<ScrollView
+					<View style={{ flex: 1 }}>
+						<FlatList
+							style={{
+								// height: "auto",
+								// maxHeight: screenHeight - 200,
+								alignContent: "flex-end",
+								// justifyContent: "flex-end",
+								// paddingVertical: 50,
+								// alignItems: "center",
+								borderWidth: 1,
+								borderColor: "black",
+								// paddingRight: -20,
+							}}
+							data={messages}
+							renderItem={({ item }) => {
+								return <MessagePart {...item} {...myInfo} />
+							}}
+							// ref={scrollViewRef}
+							// onContentSizeChange={(w, h) => {
+							// 	console.log(h)
+							// 	scrollViewRef.current.scrollToEnd({
+							// 		animated: true,
+							// 	})
+							// }}
+							scrollTo
+							showsVerticalScrollIndicator={false}
+							// refreshControl={
+							// 	<RefreshControl
+							// 		refreshing={refreshing}
+							// 		onRefresh={refresh}
+							// 	/>
+							// }
+							inverted
+						></FlatList>
+						{/* <ScrollView
 							contentContainerStyle={{
-								height: "auto",
-								maxHeight: screenHeight - 200,
+								// height: "auto",
+								// maxHeight: screenHeight - 200,
 								alignContent: "flex-end",
 								justifyContent: "flex-end",
 								// paddingVertical: 50,
 								alignItems: "center",
 								borderWidth: 1,
 								borderColor: "black",
+								paddingRight: -20,
 							}}
-							scrollEnabled={false}
-							nestedScrollEnabled={false}
+							ref={scrollViewRef}
+							onContentSizeChange={(w, h) => {
+								// console.log(h)
+								scrollViewRef.current.scrollToEnd({
+									animated: true,
+								})
+							}}
+							showsVerticalScrollIndicator={false}
 							refreshControl={
 								<RefreshControl
 									refreshing={refreshing}
@@ -202,7 +305,7 @@ export default ({ route }) => {
 									}
 									return
 								})}
-						</ScrollView>
+						</ScrollView> */}
 
 						<TextInput
 							placeholder="Type a message"
@@ -213,7 +316,7 @@ export default ({ route }) => {
 								backgroundColor: "white",
 								borderRadius: 10,
 								paddingVertical: 10,
-								marginBottom: 10,
+								marginBottom: 0,
 							}}
 							returnKeyType="send"
 							value={message}
