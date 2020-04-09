@@ -11,7 +11,7 @@ const MainNavigator = createStackNavigator()
 export default () => (
 	<NavigationContainer>
 		<MainNavigator.Navigator
-			initialRouteName="TabNavigation"
+			initialRouteName="MessageNavigation"
 			headerMode="none"
 			mode="card"
 			screenOptions={{ headerStyle: { ...stackStyles } }}

@@ -3,20 +3,33 @@ import * as MediaLibrary from "expo-media-library"
 import * as Permissions from "expo-permissions"
 import styled from "styled-components"
 import Loader from "../../components/Loader"
-import { Image, TouchableOpacity, ScrollView } from "react-native"
+import { Image, TouchableOpacity, ScrollView, Button } from "react-native"
 import constants from "../../constants"
 import styles from "../../styles"
 import { useNavigation } from "@react-navigation/native"
+import { useIsDrawerOpen } from "@react-navigation/drawer"
 
 const View = styled.View`
 	flex: 1;
 	/* flex-direction: row; */
 `
-const Button = styled.TouchableOpacity`
+const RightButton = styled.TouchableOpacity`
 	width: 100px;
 	height: 30px;
 	position: absolute;
 	right: 5px;
+	top: 15px;
+	background-color: ${styles.blueColor};
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+`
+
+const LeftButton = styled.TouchableOpacity`
+	width: 100px;
+	height: 30px;
+	position: absolute;
+	left: 5px;
 	top: 15px;
 	background-color: ${styles.blueColor};
 	justify-content: center;
@@ -45,7 +58,7 @@ export default ({ route }) => {
 			const [firstPhoto] = assets
 			setSelected(firstPhoto)
 			setAllPhotos(assets)
-			console.log(selected)
+			// console.log(selected)
 		} catch (error) {
 			console.log(error)
 		} finally {
@@ -70,9 +83,19 @@ export default ({ route }) => {
 	const handleSelected = () => {
 		navigation.navigate("UploadPhoto", { photo: selected })
 	}
+	const goAlbumList = async () => {
+		const album = await MediaLibrary.getAlbumsAsync()
+		// console.log(album)
+		navigation.navigate("AlbumDrawNavigation", {
+			album: album,
+			// screen: "AlbumList",
+			// params: { album },
+		})
+	}
 	useEffect(() => {
 		askPermission()
 	}, [])
+
 	return (
 		<View>
 			{loading ? (
@@ -85,17 +108,23 @@ export default ({ route }) => {
 								key={selected.id}
 								style={{
 									width: constants.width,
-									height: constants.height / 2
+									height: constants.height / 2,
 								}}
 								source={{ uri: selected.uri }}
 							/>
-							<Button onPress={handleSelected}>
+							<RightButton onPress={handleSelected}>
 								<Text>Select Photo</Text>
-							</Button>
+							</RightButton>
+							<LeftButton
+								onPress={() => navigation.toggleDrawer()}
+								title="Toggle Drawer"
+							>
+								<Text>Album List</Text>
+							</LeftButton>
 							<ScrollView
 								contentContainerStyle={{
 									flexDirection: "row",
-									flexWrap: "wrap"
+									flexWrap: "wrap",
 								}}
 							>
 								{allPhotos.map((photo) => (
@@ -112,7 +141,7 @@ export default ({ route }) => {
 												opacity:
 													photo.id === selected.id
 														? 0.5
-														: 1
+														: 1,
 											}}
 										/>
 									</TouchableOpacity>
@@ -120,11 +149,11 @@ export default ({ route }) => {
 							</ScrollView>
 						</>
 					) : (
-						"You canceled"
+						<Text>"Your permission canceled"</Text>
 					)}
 				</View>
 			) : (
-				"You don't have any photo"
+				<Text>"You don't have any photo"</Text>
 			)}
 		</View>
 	)

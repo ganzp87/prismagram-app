@@ -17,12 +17,16 @@ import {
 	ActivityIndicator,
 	Dimensions,
 	FlatList,
+	Image,
+	TouchableOpacity,
 } from "react-native"
 import MessagePart from "./MessagePart"
 import { SEEROOM, SEND_MESSAGE, NEW_MESSAGE } from "./MessageQuries"
 import { Notifications } from "expo"
 import * as Permissions from "expo-permissions"
 import Constants from "expo-constants"
+import NavIcon from "../../components/NavIcon"
+import { useNavigation } from "@react-navigation/native"
 
 export default ({ route }) => {
 	const messageList = []
@@ -33,6 +37,7 @@ export default ({ route }) => {
 	const scrollViewRef = useRef(null)
 	const [refreshing, setRefreshing] = useState(false)
 	const [message, setMessage] = useState()
+	const navigation = useNavigation()
 
 	const { data: { seeRoom: oldRoom = [] } = [], error, refetch } = useQuery(
 		SEEROOM,
@@ -141,7 +146,7 @@ export default ({ route }) => {
 	// }
 
 	const screenHeight = Dimensions.get("window").height
-	console.log(screenHeight)
+	// console.log(screenHeight)
 
 	const [notificationStatus, setStatus] = useState(false)
 	const askPushMessagePermission = async () => {
@@ -306,23 +311,42 @@ export default ({ route }) => {
 									return
 								})}
 						</ScrollView> */}
-
-						<TextInput
-							placeholder="Type a message"
-							style={{
-								alignItems: "flex-end",
-								// marginTop: 50,
-								width: "100%",
-								backgroundColor: "white",
-								borderRadius: 10,
-								paddingVertical: 10,
-								marginBottom: 0,
-							}}
-							returnKeyType="send"
-							value={message}
-							onChangeText={onChangeText}
-							onSubmitEditing={onSubmit}
-						/>
+						<View style={{ flexDirection: "row", paddingTop: 5 }}>
+							<TouchableOpacity
+								onPress={() =>
+									navigation.navigate("MessageNavigation", {
+										screen: "AlbumDrawNavigation",
+									})
+								}
+							>
+								<NavIcon
+									size={50}
+									name={
+										Platform.OS === "ios"
+											? "ios-camera"
+											: "md-camera"
+									}
+								/>
+							</TouchableOpacity>
+							<TextInput
+								placeholder="Type a message"
+								style={{
+									alignItems: "flex-end",
+									// marginTop: 50,
+									width: "100%",
+									backgroundColor: "white",
+									borderRadius: 10,
+									paddingVertical: 10,
+									marginBottom: 0,
+									marginLeft: 10,
+									paddingLeft: 10,
+								}}
+								returnKeyType="send"
+								value={message}
+								onChangeText={onChangeText}
+								onSubmitEditing={onSubmit}
+							/>
+						</View>
 					</View>
 				</View>
 			</Suspense>
