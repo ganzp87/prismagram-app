@@ -4,8 +4,7 @@ import {
 	DrawerItemList,
 	DrawerItem,
 } from "@react-navigation/drawer"
-import { View, Text, TouchableOpacity } from "react-native"
-import * as MediaLibrary from "expo-media-library"
+import { Text } from "react-native"
 
 export default (props) => {
 	// const props = route.params?.album

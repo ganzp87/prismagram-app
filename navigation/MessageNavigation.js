@@ -8,7 +8,6 @@ import { stackStyles } from "./config"
 import SelectPhoto from "../screens/Photo/SelectPhoto"
 import AlbumList from "../screens/Photo/AlbumList"
 import DrawContents from "../screens/Photo/DrawContents"
-import { useNavigation } from "@react-navigation/native"
 
 const Stack = createStackNavigator()
 
@@ -16,7 +15,6 @@ const Drawer = createDrawerNavigator()
 
 const AlbumDrawNavigation = (props) => {
 	const dimensions = useWindowDimensions()
-	const navigation = useNavigation()
 	return (
 		<Drawer.Navigator
 			drawerStyle={dimensions.width > 900 ? "permanent" : "front"}

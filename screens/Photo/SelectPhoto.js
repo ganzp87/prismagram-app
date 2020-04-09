@@ -88,8 +88,6 @@ export default ({ route }) => {
 		// console.log(album)
 		navigation.navigate("AlbumDrawNavigation", {
 			album: album,
-			// screen: "AlbumList",
-			// params: { album },
 		})
 	}
 	useEffect(() => {
