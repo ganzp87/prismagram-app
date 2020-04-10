@@ -27,6 +27,7 @@ import * as Permissions from "expo-permissions"
 import Constants from "expo-constants"
 import NavIcon from "../../components/NavIcon"
 import { useNavigation } from "@react-navigation/native"
+import * as MediaLibrary from "expo-media-library"
 
 export default ({ route }) => {
 	const messageList = []
@@ -313,11 +314,22 @@ export default ({ route }) => {
 						</ScrollView> */}
 						<View style={{ flexDirection: "row", paddingTop: 5 }}>
 							<TouchableOpacity
-								onPress={() =>
-									navigation.navigate("MessageNavigation", {
-										screen: "AlbumDrawNavigation",
-									})
-								}
+								onPress={async () => {
+									const album = await MediaLibrary.getAlbumsAsync()
+									return navigation.navigate(
+										"MessageNavigation",
+										{
+											screen: "AlbumDrawNavigation",
+											parmas: {
+												album: album,
+												screen: "SelectPhoto",
+												params: {
+													album: album,
+												},
+											},
+										}
+									)
+								}}
 							>
 								<NavIcon
 									size={50}

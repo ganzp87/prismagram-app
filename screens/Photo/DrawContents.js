@@ -7,8 +7,6 @@ import {
 import { Text } from "react-native"
 
 export default (props) => {
-	// const props = route.params?.album
-	// console.log(route)
 	console.log("test")
 	console.log(props)
 	return (

@@ -86,9 +86,10 @@ export default ({ route }) => {
 	const goAlbumList = async () => {
 		const album = await MediaLibrary.getAlbumsAsync()
 		// console.log(album)
-		navigation.navigate("AlbumDrawNavigation", {
-			album: album,
-		})
+		// navigation.navigate("AlbumDrawNavigation", {
+		// 	album: album,
+		// })
+		navigation.toggleDrawer()
 	}
 	useEffect(() => {
 		askPermission()
@@ -114,7 +115,10 @@ export default ({ route }) => {
 								<Text>Select Photo</Text>
 							</RightButton>
 							<LeftButton
-								onPress={() => navigation.toggleDrawer()}
+								onPress={
+									goAlbumList
+									// navigation.toggleDrawer(),
+								}
 								title="Toggle Drawer"
 							>
 								<Text>Album List</Text>

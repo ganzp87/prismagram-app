@@ -13,7 +13,7 @@ const Stack = createStackNavigator()
 
 const Drawer = createDrawerNavigator()
 
-const AlbumDrawNavigation = (props) => {
+const AlbumDrawNavigation = (navigation) => {
 	const dimensions = useWindowDimensions()
 	return (
 		<Drawer.Navigator
@@ -22,10 +22,10 @@ const AlbumDrawNavigation = (props) => {
 				backgroundColor: "white",
 				width: 240,
 			}}
-			// drawerContent={() => {
-			// 	// console.log(props)
-			// 	return DrawContents
-			// }}
+			drawerContent={(props) => {
+				console.log(props)
+				return <DrawContents {...props} />
+			}}
 		>
 			<Drawer.Screen
 				name="SelectPhoto"
@@ -36,10 +36,6 @@ const AlbumDrawNavigation = (props) => {
 				name="AlbumList"
 				component={AlbumList}
 				options={{ title: "폴더별 사진" }}
-				listeners={
-					(props) => console.log(props)
-					// navigation.dispatch("AlbumList", { nav: navigation.route })
-				}
 			/>
 		</Drawer.Navigator>
 	)
@@ -49,17 +45,11 @@ export default ({ route }) => (
 	<Stack.Navigator screenOptions={{ headerStyle: { ...stackStyles } }}>
 		<Stack.Screen name="Messages" component={Messages} />
 		<Stack.Screen name="Message" component={Message} />
-		{/* <Stack.Screen name="SelectPhoto" component={SelectPhoto} /> */}
 		<Stack.Screen
 			name="AlbumDrawNavigation"
 			component={AlbumDrawNavigation}
 			options={{
 				title: "사진첩",
-			}}
-			listeners={{
-				focus: (e) => {
-					console.log(route)
-				},
 			}}
 		/>
 	</Stack.Navigator>

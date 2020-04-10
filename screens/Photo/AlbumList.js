@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, ScrollView, Button } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 
 export default (props) => {
-	console.log(props)
 	const openAlbum = async (title) => {
 		const album = await MediaLibrary.getAlbumAsync(title)
 		console.log(album)
