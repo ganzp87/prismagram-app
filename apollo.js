@@ -11,13 +11,13 @@ import { AuthContext } from "./AuthContext"
 
 const httpOptions = {
 	uri:
-		process.env.NODE_ENV === "developmen"
+		process.env.NODE_ENV === "development"
 			? "http://192.168.0.3:4000"
 			: "https://prismagram-backendd.herokuapp.com/",
 }
 const wsOptions = {
 	uri:
-		process.env.NODE_ENV === "developmen"
+		process.env.NODE_ENV === "development"
 			? `ws://192.168.0.3:4000/`
 			: `wss://prismagram-backendd.herokuapp.com/`,
 }

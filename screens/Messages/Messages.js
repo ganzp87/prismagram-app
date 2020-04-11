@@ -53,7 +53,7 @@ export default () => {
 	const { loading, data, refetch } = useQuery(SEEROOMS, {
 		// fetchPolicy: "network-only",
 		// partialRefetch: true,
-		suspend: true,
+		// suspend: true,
 	})
 	// console.log(data)
 	const navigation = useNavigation()
@@ -71,69 +71,65 @@ export default () => {
 	}
 	// console.log("email", email)
 	return (
-		<Suspense
-			fallback={
-				<SuspendView
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-					}}
-				>
-					<ActivityIndicator />
-				</SuspendView>
+		// Suspense 오류 발생함 (처음 시작시, 그 다음부터는 ok)
+		// <Suspense
+		// 	fallback={
+		// 		<SuspendView
+		// 			style={{
+		// 				flex: 1,
+		// 				justifyContent: "center",
+		// 				alignItems: "center",
+		// 			}}
+		// 		>
+		// 			<ActivityIndicator />
+		// 		</SuspendView>
+		// 	}
+		// >
+		<ScrollView
+			contentContainerStyle={{
+				// flex: 1,
+				// justifyContent: "flex-end",
+				alignItems: "center",
+				justifyContent: "center",
+				// paddingVertical: 0
+			}}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={refresh} />
 			}
 		>
-			<ScrollView
-				contentContainerStyle={{
-					// flex: 1,
-					// justifyContent: "flex-end",
-					alignItems: "center",
-					justifyContent: "center",
-					// paddingVertical: 0
-				}}
-				refreshControl={
-					<RefreshControl
-						refreshing={refreshing}
-						onRefresh={refresh}
-					/>
-				}
-			>
-				{loading ? (
-					<Loader />
-				) : (
-					data &&
-					data.seeRooms &&
-					data.seeRooms.map((room) => {
-						return (
-							<TouchableOpacity
-								style={{ padding: 10, alignItems: "center" }}
-								onPress={() =>
-									navigation.navigate("Message", {
-										roomId: room.id,
-										email: email !== undefined ? email : "",
-									})
-								}
-							>
-								<Text key={room.participants[0].id}>
-									상대방 :{" "}
-									{room.participants[0].email === email
-										? room.participants[1].username
-										: room.participants[0].username}
+			{loading ? (
+				<Loader />
+			) : (
+				data &&
+				data.seeRooms &&
+				data.seeRooms.map((room) => {
+					return (
+						<TouchableOpacity
+							style={{ padding: 10, alignItems: "center" }}
+							onPress={() =>
+								navigation.navigate("Message", {
+									roomId: room.id,
+									email: email !== undefined ? email : "",
+								})
+							}
+						>
+							<Text key={room.participants[0].id}>
+								상대방 :{" "}
+								{room.participants[0].email === email
+									? room.participants[1].username
+									: room.participants[0].username}
+							</Text>
+							<View key={room.id}>
+								<Text key={room.id}>채팅방 ID : {room.id}</Text>
+								<Text key={room.id + 1}>
+									최종 수신일 : {room.updatedAt}
 								</Text>
-								<View key={room.id}>
-									<Text key={room.id}>
-										채팅방 ID : {room.id}
-									</Text>
-									<Text key={room.id + 1}>
-										최종 수신일 : {room.updatedAt}
-									</Text>
-								</View>
-							</TouchableOpacity>
-						)
-					})
-				)}
-			</ScrollView>
-		</Suspense>
+							</View>
+						</TouchableOpacity>
+					)
+				})
+			)}
+		</ScrollView>
+		// {/* </Suspense> */}
 	)
 }

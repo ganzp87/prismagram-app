@@ -3,21 +3,15 @@ import * as MediaLibrary from "expo-media-library"
 import * as Permissions from "expo-permissions"
 import styled from "styled-components"
 import Loader from "../../components/Loader"
-import {
-	Image,
-	TouchableOpacity,
-	ScrollView,
-	Button,
-	Alert,
-} from "react-native"
+import { Image, TouchableOpacity, ScrollView, Button } from "react-native"
 import constants from "../../constants"
 import styles from "../../styles"
 import { useNavigation } from "@react-navigation/native"
 import { useIsDrawerOpen } from "@react-navigation/drawer"
 import ImageZoom from "react-native-image-pan-zoom"
+import sendPhoto from "./sendPhoto"
 import { useMutation } from "react-apollo-hooks"
 import { SEND_IMG } from "../Messages/MessageQuries"
-import axios from "axios"
 
 const View = styled.View`
 	flex: 1;
@@ -52,15 +46,13 @@ const Text = styled.Text`
 	font-weight: 600;
 `
 
-export default ({ route }) => {
+export default ({ navigation, route }) => {
 	const [loading, setLoading] = useState(true)
 	const [hasPermission, setHasPermission] = useState(false)
 	const [selected, setSelected] = useState()
 	const [allPhotos, setAllPhotos] = useState()
 	const [toId, setToId] = useState()
-	const navigation = useNavigation()
-	// console.log(route)
-	// console.log(selected)
+	console.log(route)
 	const updateToId = () => {
 		const toId =
 			route.params.room.participants[0].email ===
@@ -69,33 +61,25 @@ export default ({ route }) => {
 				: route.params.room.participants[0].id
 		setToId(toId)
 	}
-
 	const [uploadMutation] = useMutation(SEND_IMG)
-
 	const changeSelected = (photo) => {
 		setSelected(photo)
 	}
 	const getPhotos = async () => {
 		try {
 			const album = route.params.album
-			if (album) {
-				const { assets } = await MediaLibrary.getAssetsAsync({
-					first: 500,
-					album,
-					mediaType: MediaLibrary.MediaType.photo,
-				})
-				const [firstPhoto] = assets
-				setSelected(firstPhoto)
-				setAllPhotos(assets)
-			} else {
-				const { assets } = await MediaLibrary.getAssetsAsync({
-					first: 500,
-					mediaType: MediaLibrary.MediaType.photo,
-				})
-				const [firstPhoto] = assets
-				setSelected(firstPhoto)
-				setAllPhotos(assets)
+			const { assets } = await MediaLibrary.getAssetsAsync({
+				first: 500,
+				album,
+				mediaType: MediaLibrary.MediaType.photo,
+			})
+			if (assets) {
+				setSelected()
+				setAllPhotos()
 			}
+			const [firstPhoto] = assets
+			setSelected(firstPhoto)
+			setAllPhotos(assets)
 		} catch (error) {
 			console.log(error)
 		} finally {
@@ -117,9 +101,10 @@ export default ({ route }) => {
 			setHasPermission(false)
 		}
 	}
+
 	const handleSubmit = async () => {
 		const formData = new FormData()
-		const name = selected.filename
+		const name = photo.filename
 		const [, type] = name.split(".")
 		formData.append("file", {
 			name,
@@ -127,7 +112,7 @@ export default ({ route }) => {
 			uri: selected.uri,
 		})
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const {
 				data: { location },
 			} = await axios.post(
@@ -139,35 +124,35 @@ export default ({ route }) => {
 					},
 				}
 			)
+			console.log(location)
 
 			const {
 				data: { upload },
 			} = await uploadMutation({
 				variables: {
-					roomId: route.params.room.id,
+					roomId: route.room.id,
 					toId,
-					url: location,
+					file: location,
 				},
 			})
-			console.log(upload)
-			// if (upload.id) {
-			navigation.navigate("Message", { upload })
-			// }
+			// console.log(upload)
+			if (upload.id) {
+				navigation.navigate("TabNavigation")
+			}
 		} catch (error) {
 			console.log(error)
 			Alert.alert("Can't upload", "Try later")
-			setLoading(false)
+			setIsLoading(false)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 	useEffect(() => {
 		updateToId()
 	}, [route.params.participants])
-
 	useEffect(() => {
 		askPermission()
-	}, [route])
+	}, [navigation])
 
 	return (
 		<View>
@@ -207,25 +192,29 @@ export default ({ route }) => {
 									flexWrap: "wrap",
 								}}
 							>
-								{allPhotos.map((photo) => (
-									<TouchableOpacity
-										key={photo.id}
-										onPress={() => changeSelected(photo)}
-									>
-										<Image
+								{allPhotos &&
+									allPhotos.map((photo) => (
+										<TouchableOpacity
 											key={photo.id}
-											source={{ uri: photo.uri }}
-											style={{
-												width: constants.width / 3,
-												height: constants.height / 6,
-												opacity:
-													photo.id === selected.id
-														? 0.5
-														: 1,
-											}}
-										/>
-									</TouchableOpacity>
-								))}
+											onPress={() =>
+												changeSelected(photo)
+											}
+										>
+											<Image
+												key={photo.id}
+												source={{ uri: photo.uri }}
+												style={{
+													width: constants.width / 3,
+													height:
+														constants.height / 6,
+													opacity:
+														photo.id === selected.id
+															? 0.5
+															: 1,
+												}}
+											/>
+										</TouchableOpacity>
+									))}
 							</ScrollView>
 						</>
 					) : (

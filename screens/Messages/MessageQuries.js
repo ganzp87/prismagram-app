@@ -7,6 +7,7 @@ export const SEEROOM = gql`
 				id
 				participants {
 					id
+					email
 					username
 				}
 				createdAt
@@ -28,6 +29,10 @@ export const SEEROOM = gql`
 					avatar
 				}
 				text
+				file {
+					id
+					url
+				}
 				createdAt
 			}
 		}
@@ -75,6 +80,23 @@ export const NEW_MESSAGE = gql`
 			}
 			text
 			createdAt
+		}
+	}
+`
+
+export const SEND_IMG = gql`
+	mutation sendImg($roomId: String!, $toId: String!, $url: String!) {
+		sendImg(roomId: $roomId, toId: $toId, url: $url) {
+			id
+			file {
+				id
+				url
+			}
+			to {
+				id
+				email
+				username
+			}
 		}
 	}
 `

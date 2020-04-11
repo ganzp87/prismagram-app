@@ -1,21 +1,19 @@
 import React from "react"
 import { View, Text, Image } from "react-native"
+import TouchableImage from "./TouchableImage"
 
-export default ({ from, text, id, email }) => {
+export default ({ from, text, id, email, file = null }) => {
 	let isSelf
+	let url
 	if (from.email !== "" && from.email !== undefined) {
 		isSelf = from.email === email
 	}
-	// console.log(
-	// 	text,
-	// 	from.username,
-	// 	"isSelf :",
-	// 	isSelf,
-	// 	"받는사람 :",
-	// 	from.email,
-	// 	"본인 :",
-	// 	email
-	// )
+	// console.log(file)
+	if (file !== null) {
+		url = file.url
+	} else {
+		url = ""
+	}
 	return (
 		isSelf !== undefined && (
 			<View
@@ -44,9 +42,16 @@ export default ({ from, text, id, email }) => {
 										: "",
 							}}
 						/>
-						<Text>
-							{text} : {from.username}
-						</Text>
+						{url !== "" ? (
+							<View style={{ flexDirection: "row" }}>
+								<Text>{from.username}</Text>
+								<TouchableImage {...file} />
+							</View>
+						) : (
+							<Text>
+								{text} : {from.username}
+							</Text>
+						)}
 					</View>
 				) : (
 					<View>
@@ -64,9 +69,16 @@ export default ({ from, text, id, email }) => {
 										: "",
 							}}
 						/>
-						<Text>
-							{from.username} : {text}
-						</Text>
+						{url !== "" ? (
+							<View style={{ flexDirection: "row" }}>
+								<Text>{from.username}</Text>
+								<TouchableImage {...file} />
+							</View>
+						) : (
+							<Text>
+								{from.username} : {text}
+							</Text>
+						)}
 					</View>
 				)}
 			</View>

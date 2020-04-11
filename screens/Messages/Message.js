@@ -1,15 +1,6 @@
-import React, {
-	useState,
-	useEffect,
-	Suspense,
-	useRef,
-	useImperativeHandle,
-} from "react"
+import React, { useState, useEffect, Suspense, useRef } from "react"
 import { useQuery, useMutation, useSubscription } from "react-apollo-hooks"
-import Loader from "../../components/Loader"
 import {
-	ScrollView,
-	RefreshControl,
 	View,
 	Text,
 	TextInput,
@@ -17,7 +8,6 @@ import {
 	ActivityIndicator,
 	Dimensions,
 	FlatList,
-	Image,
 	TouchableOpacity,
 } from "react-native"
 import MessagePart from "./MessagePart"
@@ -27,7 +17,6 @@ import * as Permissions from "expo-permissions"
 import Constants from "expo-constants"
 import NavIcon from "../../components/NavIcon"
 import { useNavigation } from "@react-navigation/native"
-import * as MediaLibrary from "expo-media-library"
 
 export default ({ route }) => {
 	const messageList = []
@@ -35,8 +24,6 @@ export default ({ route }) => {
 	const myInfo = {
 		email: route.params.email,
 	}
-	const scrollViewRef = useRef(null)
-	const [refreshing, setRefreshing] = useState(false)
 	const [message, setMessage] = useState()
 	const navigation = useNavigation()
 
@@ -134,18 +121,6 @@ export default ({ route }) => {
 		setMessage(text)
 	}
 
-	// const refresh = async () => {
-	// 	try {
-	// 		setRefreshing(true)
-	// 		const a = await refetch()
-	// 		setMessages(a.data.seeRoom.messages)
-	// 	} catch (error) {
-	// 		console.log(error)
-	// 	} finally {
-	// 		setRefreshing(false)
-	// 	}
-	// }
-
 	const screenHeight = Dimensions.get("window").height
 	// console.log(screenHeight)
 
@@ -177,15 +152,18 @@ export default ({ route }) => {
 			console.log(error)
 		}
 	}
-	useEffect(() => {
-		askPushMessagePermission()
-	}, [])
 	if (messages) {
 		messages.sort(
 			(a, b) =>
 				Date.parse(new Date(b.createdAt)) - Date.parse(a.createdAt)
 		)
 	}
+	useEffect(() => {
+		askPushMessagePermission()
+	}, [])
+	useEffect(() => {
+		refetch()
+	}, [route])
 	return (
 		<KeyboardAvoidingView
 			keyboardVerticalOffset={screenHeight - 700}
@@ -240,91 +218,33 @@ export default ({ route }) => {
 					<View style={{ flex: 1 }}>
 						<FlatList
 							style={{
-								// height: "auto",
-								// maxHeight: screenHeight - 200,
 								alignContent: "flex-end",
-								// justifyContent: "flex-end",
-								// paddingVertical: 50,
-								// alignItems: "center",
+
 								borderWidth: 1,
 								borderColor: "black",
-								// paddingRight: -20,
 							}}
 							data={messages}
 							renderItem={({ item }) => {
 								return <MessagePart {...item} {...myInfo} />
+								// console.log(item.text, item.file)
 							}}
-							// ref={scrollViewRef}
-							// onContentSizeChange={(w, h) => {
-							// 	console.log(h)
-							// 	scrollViewRef.current.scrollToEnd({
-							// 		animated: true,
-							// 	})
-							// }}
 							scrollTo
 							showsVerticalScrollIndicator={false}
-							// refreshControl={
-							// 	<RefreshControl
-							// 		refreshing={refreshing}
-							// 		onRefresh={refresh}
-							// 	/>
-							// }
 							inverted
 						></FlatList>
-						{/* <ScrollView
-							contentContainerStyle={{
-								// height: "auto",
-								// maxHeight: screenHeight - 200,
-								alignContent: "flex-end",
-								justifyContent: "flex-end",
-								// paddingVertical: 50,
-								alignItems: "center",
-								borderWidth: 1,
-								borderColor: "black",
-								paddingRight: -20,
-							}}
-							ref={scrollViewRef}
-							onContentSizeChange={(w, h) => {
-								// console.log(h)
-								scrollViewRef.current.scrollToEnd({
-									animated: true,
-								})
-							}}
-							showsVerticalScrollIndicator={false}
-							refreshControl={
-								<RefreshControl
-									refreshing={refreshing}
-									onRefresh={refresh}
-								/>
-							}
-						>
-							{messages &&
-								messages.map((message) => {
-									if (!messageList.includes(message)) {
-										messageList.push(message)
-										return (
-											<MessagePart
-												{...message}
-												{...myInfo}
-											/>
-										)
-									}
-									return
-								})}
-						</ScrollView> */}
+
 						<View style={{ flexDirection: "row", paddingTop: 5 }}>
 							<TouchableOpacity
 								onPress={async () => {
-									const album = await MediaLibrary.getAlbumsAsync()
 									return navigation.navigate(
 										"MessageNavigation",
 										{
 											screen: "AlbumDrawNavigation",
-											parmas: {
-												album: album,
+											params: {
 												screen: "SelectPhoto",
 												params: {
-													album: album,
+													room: oldRoom.room,
+													myEmail: route.params.email,
 												},
 											},
 										}
