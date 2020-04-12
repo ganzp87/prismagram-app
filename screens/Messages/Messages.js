@@ -71,20 +71,6 @@ export default () => {
 	}
 	// console.log("email", email)
 	return (
-		// Suspense 오류 발생함 (처음 시작시, 그 다음부터는 ok)
-		// <Suspense
-		// 	fallback={
-		// 		<SuspendView
-		// 			style={{
-		// 				flex: 1,
-		// 				justifyContent: "center",
-		// 				alignItems: "center",
-		// 			}}
-		// 		>
-		// 			<ActivityIndicator />
-		// 		</SuspendView>
-		// 	}
-		// >
 		<ScrollView
 			contentContainerStyle={{
 				// flex: 1,
@@ -102,7 +88,7 @@ export default () => {
 			) : (
 				data &&
 				data.seeRooms &&
-				data.seeRooms.map((room) => {
+				data.seeRooms.map((room, index) => {
 					return (
 						<TouchableOpacity
 							style={{ padding: 10, alignItems: "center" }}
@@ -112,8 +98,9 @@ export default () => {
 									email: email !== undefined ? email : "",
 								})
 							}
+							key={index}
 						>
-							<Text key={room.participants[0].id}>
+							<Text key={index}>
 								상대방 :{" "}
 								{room.participants[0].email === email
 									? room.participants[1].username
@@ -130,6 +117,5 @@ export default () => {
 				})
 			)}
 		</ScrollView>
-		// {/* </Suspense> */}
 	)
 }

@@ -6,8 +6,9 @@ import AuthInput from "../../components/AuthInput"
 import useInput from "../../hooks/useInput"
 import { Alert } from "react-native"
 import { useMutation } from "react-apollo-hooks"
-import { CONFIRM_SECRET } from "./AuthQueries"
+import { CONFIRM_SECRET, SAVE_PUSH_TOKEN } from "./AuthQueries"
 import { useLogIn } from "../../AuthContext"
+import { askPushMessagePermission } from "../../gePermission"
 
 const View = styled.View`
 	justify-content: center;
@@ -25,6 +26,7 @@ export default ({ navigation, route }) => {
 			email: route.params.email,
 		},
 	})
+	const [savePushTokenMutation] = useMutation(SAVE_PUSH_TOKEN)
 	// console.log(route)
 	const handleConfirm = async () => {
 		const { value } = confirmInput
@@ -40,6 +42,23 @@ export default ({ navigation, route }) => {
 				console.log(confirmSecret)
 				// await AsyncStorage.setItem("email", route.params.email)
 				logIn(confirmSecret, route.params.email)
+				const [
+					notiPermission,
+					pushToken,
+				] = await askPushMessagePermission()
+				console.log(pushToken)
+				if (notiPermission) {
+					const data = await savePushTokenMutation({
+						variables: {
+							email: route.params.email,
+							pushToken,
+						},
+					})
+					Alert.alert("알림 수신동의를 하셨습니다.")
+					console.log(data)
+				} else {
+					Alert.alert("알림 수신거부를 하셨습니다.")
+				}
 			} else {
 				Alert.alert("Wrong secret!")
 			}

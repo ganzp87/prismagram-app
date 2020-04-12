@@ -12,20 +12,17 @@ import {
 } from "react-native"
 import MessagePart from "./MessagePart"
 import { SEEROOM, SEND_MESSAGE, NEW_MESSAGE } from "./MessageQuries"
-import { Notifications } from "expo"
-import * as Permissions from "expo-permissions"
-import Constants from "expo-constants"
 import NavIcon from "../../components/NavIcon"
 import { useNavigation } from "@react-navigation/native"
 
 export default ({ route }) => {
-	const messageList = []
 	const roomId = route.params.roomId
 	const myInfo = {
 		email: route.params.email,
 	}
 	const [message, setMessage] = useState()
 	const navigation = useNavigation()
+	const [toUser, setYoUser] = useState()
 
 	const { data: { seeRoom: oldRoom = [] } = [], error, refetch } = useQuery(
 		SEEROOM,
@@ -40,6 +37,16 @@ export default ({ route }) => {
 			// returnPartialData: true,
 		}
 	)
+	const checkToUser = () => {
+		if (oldRoom !== []) {
+			const toUser = oldRoom.room.participants.filter(
+				(user) => user.email !== myInfo.email
+			)
+			// console.log(toUser[0].id)
+			setYoUser(toUser)
+		}
+	}
+
 	const [messages, setMessages] = useState(oldRoom.messages || [])
 	const [sendMessageMutation] = useMutation(SEND_MESSAGE, {
 		refetchQueries: refetch,
@@ -99,6 +106,7 @@ export default ({ route }) => {
 		setMessages(oldRoom.messages)
 	}, [oldRoom.messages])
 	useEffect(() => {
+		checkToUser()
 		handleNewMessage(data)
 	}, [data])
 	const onSubmit = async () => {
@@ -110,6 +118,7 @@ export default ({ route }) => {
 				variables: {
 					roomId,
 					text: message,
+					toId: toUser[0].id,
 				},
 			})
 			setMessage("")
@@ -122,45 +131,13 @@ export default ({ route }) => {
 	}
 
 	const screenHeight = Dimensions.get("window").height
-	// console.log(screenHeight)
 
-	const [notificationStatus, setStatus] = useState(false)
-	const askPushMessagePermission = async () => {
-		try {
-			if (Constants.isDevice) {
-				const { status: existingStatus } = await Permissions.getAsync(
-					Permissions.NOTIFICATIONS
-				)
-				let finalStatus = existingStatus
-				if (existingStatus !== "granted") {
-					const { status } = await Permissions.askAsync(
-						Permissions.NOTIFICATIONS
-					)
-					finalStatus = status
-				}
-				console.log(finalStatus)
-				setStatus(finalStatus)
-				let token = await Notifications.getExpoPushTokenAsync()
-				// ExponentPushToken[sAj6CfOeifkdcTm6N9yTJf]
-				console.log(token)
-				// Notifications.setBadgeNumberAsync(0)
-			} else {
-				console.log("Must use physical device for Push Notifications")
-				// alert("Must use physical device for Push Notifications")
-			}
-		} catch (error) {
-			console.log(error)
-		}
-	}
 	if (messages) {
 		messages.sort(
 			(a, b) =>
 				Date.parse(new Date(b.createdAt)) - Date.parse(a.createdAt)
 		)
 	}
-	useEffect(() => {
-		askPushMessagePermission()
-	}, [])
 	useEffect(() => {
 		refetch()
 	}, [route])
@@ -186,7 +163,6 @@ export default ({ route }) => {
 			>
 				<View
 					style={{
-						// paddingVertical: 50,
 						padding: 10,
 						flex: 1,
 						width: "100%",

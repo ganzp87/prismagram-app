@@ -29,3 +29,12 @@ export const CREATE_ACCOUNT = gql`
 		)
 	}
 `
+
+export const SAVE_PUSH_TOKEN = gql`
+	mutation savePushToken($email: String!, $pushToken: String!) {
+		savePushToken(email: $email, pushToken: $pushToken) {
+			id
+			email
+		}
+	}
+`

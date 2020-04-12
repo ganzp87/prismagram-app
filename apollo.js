@@ -8,6 +8,7 @@ import { getMainDefinition } from "apollo-utilities"
 import { AsyncStorage } from "react-native"
 import { useContext } from "react"
 import { AuthContext } from "./AuthContext"
+import { Updates } from "expo"
 
 const httpOptions = {
 	uri:
@@ -82,6 +83,7 @@ const clientState = (cache) =>
 									"false"
 								)
 								await AsyncStorage.clear()
+								Updates.reload()
 							}
 						}
 					)
